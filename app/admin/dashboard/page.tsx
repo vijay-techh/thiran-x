@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabaseAuth } from "@/lib/supabaseAuthClient";
+import { supabase } from "@/lib/supabaseAuthClient";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    supabaseAuth.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
         router.push("/admin/login");
       } else {
