@@ -1,29 +1,21 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseAuthClient";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
-export default function AdminDashboard() {
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+export default async function DashboardPage() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) {
-        router.push("/admin/login");
-      } else {
-        setLoading(false);
-      }
-    });
-  }, []);
-
-  if (loading) return <p>Loading...</p>;
+  if (!user) {
+    redirect("/login");
+  }
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Admin Dashboard</h1>
-      <a href="/admin/videos">Manage Videos</a>
-    </div>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <h1 className="text-2xl font-bold">Welcome to ThiranX</h1>
+        <p className="text-gray-400">{user.email}</p>
+      </div>
+    </main>
   );
 }
