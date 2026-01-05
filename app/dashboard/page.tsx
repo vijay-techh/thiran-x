@@ -17,7 +17,7 @@ export default function DashboardPage() {
       if (!user) {
         router.push("/login");
       } else {
-        setEmail(user.email);
+        setEmail(user.email ?? null);
         window.history.replaceState(null, "", "/dashboard");
 
       }
