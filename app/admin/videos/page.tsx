@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseAuthClient";
+
+const ADMIN_EMAILS = ["vijayvijaayyyy@gmail.com"];
 
 export default function AdminVideos() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
   const [level, setLevel] = useState("beginner");
   const [orderNo, setOrderNo] = useState(1);
 
@@ -18,6 +24,40 @@ export default function AdminVideos() {
   const [videos, setVideos] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
+
+  /* 🔐 ADMIN CHECK */
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      if (!ADMIN_EMAILS.includes(user.email!)) {
+        router.replace("/dashboard");
+        return;
+      }
+
+      setChecking(false);
+    };
+
+    checkAdmin();
+  }, [router]);
+
+  /* ⏳ Prevent flash */
+  if (checking) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        Checking admin access...
+      </main>
+    );
+  }
+
+  /* ---------------- FETCH DATA ---------------- */
 
   useEffect(() => {
     fetchDegrees();
@@ -60,6 +100,8 @@ export default function AdminVideos() {
     setVideos(data || []);
   };
 
+  /* ---------------- ACTIONS ---------------- */
+
   const addVideo = async () => {
     if (!selectedPath) {
       alert("Select a career path");
@@ -84,6 +126,8 @@ export default function AdminVideos() {
     await supabase.from("videos").delete().eq("id", id);
     fetchVideos();
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <div style={{ padding: 40 }}>

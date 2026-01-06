@@ -1,32 +1,44 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+"use client";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseAuthClient";
 
 const ADMIN_EMAILS = ["vijayvijaayyyy@gmail.com"];
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function AdminPage() {
+  const router = useRouter();
 
-  // 🔒 Not logged in
-  if (!user) {
-    redirect("/login");
-  }
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  // 🔒 Logged in but NOT admin
-  if (!ADMIN_EMAILS.includes(user.email!)) {
-    redirect("/dashboard");
-  }
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
 
-  return <>{children}</>;
+      if (!ADMIN_EMAILS.includes(user.email!)) {
+        router.replace("/dashboard");
+        return;
+      }
+    };
+
+    checkAdmin();
+  }, [router]);
+
+  return (
+    <main className="min-h-screen bg-black text-white p-8">
+      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+
+      <a
+        href="/admin/videos"
+        className="inline-block border border-zinc-700 px-4 py-2 rounded hover:bg-zinc-900"
+      >
+        Manage Videos
+      </a>
+    </main>
+  );
 }
