@@ -1,26 +1,32 @@
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const ADMIN_EMAILS = ["vijayvijaayyyy@gmail.com"];
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createSupabaseServerClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Not logged in → redirect
+  // 🔒 Not logged in
   if (!user) {
     redirect("/login");
   }
 
-  // ✅ MUST return JSX
-  return (
-    <div className="min-h-screen bg-black text-white">
-      {children}
-    </div>
-  );
+  // 🔒 Logged in but NOT admin
+  if (!ADMIN_EMAILS.includes(user.email!)) {
+    redirect("/dashboard");
+  }
+
+  return <>{children}</>;
 }

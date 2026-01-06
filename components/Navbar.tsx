@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseAuthClient";
 import { useRouter } from "next/navigation";
 
+
+const ADMIN_EMAILS = ["vijayvijaayyyy@gmail.com"];
+
 export default function Navbar() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
