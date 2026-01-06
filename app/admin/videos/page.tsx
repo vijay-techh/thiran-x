@@ -19,8 +19,6 @@ export default function AdminVideos() {
   const [title, setTitle] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
-  /* ---------------- FETCH DATA ---------------- */
-
   useEffect(() => {
     fetchDegrees();
     fetchVideos();
@@ -62,8 +60,6 @@ export default function AdminVideos() {
     setVideos(data || []);
   };
 
-  /* ---------------- ACTIONS ---------------- */
-
   const addVideo = async () => {
     if (!selectedPath) {
       alert("Select a career path");
@@ -81,23 +77,18 @@ export default function AdminVideos() {
     setTitle("");
     setYoutubeUrl("");
     setOrderNo(orderNo + 1);
-
     fetchVideos();
   };
-
 
   const deleteVideo = async (id: string) => {
     await supabase.from("videos").delete().eq("id", id);
     fetchVideos();
   };
 
-  /* ---------------- UI ---------------- */
-
   return (
     <div style={{ padding: 40 }}>
       <h1>Manage Videos</h1>
 
-      {/* DEGREE */}
       <select
         onChange={(e) => {
           setSelectedDegree(e.target.value);
@@ -114,7 +105,6 @@ export default function AdminVideos() {
 
       <br /><br />
 
-      {/* AREA */}
       <select
         disabled={!areas.length}
         onChange={(e) => {
@@ -132,7 +122,6 @@ export default function AdminVideos() {
 
       <br /><br />
 
-      {/* PATH */}
       <select
         disabled={!paths.length}
         onChange={(e) => setSelectedPath(e.target.value)}
@@ -147,12 +136,12 @@ export default function AdminVideos() {
 
       <br /><br />
 
-      {/* VIDEO INPUT */}
       <input
         placeholder="Video Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+
       <br /><br />
 
       <input
@@ -160,8 +149,10 @@ export default function AdminVideos() {
         value={youtubeUrl}
         onChange={(e) => setYoutubeUrl(e.target.value)}
       />
+
       <br /><br />
-        <select value={level} onChange={(e) => setLevel(e.target.value)}>
+
+      <select value={level} onChange={(e) => setLevel(e.target.value)}>
         <option value="beginner">Beginner</option>
         <option value="intermediate">Intermediate</option>
         <option value="advanced">Advanced</option>
@@ -171,7 +162,6 @@ export default function AdminVideos() {
 
       <input
         type="number"
-        placeholder="Order (1, 2, 3...)"
         value={orderNo}
         onChange={(e) => setOrderNo(Number(e.target.value))}
       />
@@ -184,14 +174,9 @@ export default function AdminVideos() {
 
       <h2>Existing Videos</h2>
       {videos.map((v) => (
-        <div key={v.id} style={{ marginBottom: 10 }}>
+        <div key={v.id}>
           {v.title}
-          <button
-            style={{ marginLeft: 10 }}
-            onClick={() => deleteVideo(v.id)}
-          >
-            Delete
-          </button>
+          <button onClick={() => deleteVideo(v.id)}>Delete</button>
         </div>
       ))}
     </div>
