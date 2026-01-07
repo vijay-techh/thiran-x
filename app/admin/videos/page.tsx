@@ -25,12 +25,10 @@ export default function AdminVideos() {
   const [title, setTitle] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
-  /* 🔐 ADMIN CHECK */
+  /* 🔐 ADMIN CHECK (always runs) */
   useEffect(() => {
     const checkAdmin = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
         router.replace("/login");
@@ -48,21 +46,13 @@ export default function AdminVideos() {
     checkAdmin();
   }, [router]);
 
-  /* ⏳ Prevent flash */
-  if (checking) {
-    return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        Checking admin access...
-      </main>
-    );
-  }
-
-  /* ---------------- FETCH DATA ---------------- */
-
+  /* 📦 FETCH DATA — only after admin is confirmed */
   useEffect(() => {
+    if (checking) return;
+
     fetchDegrees();
     fetchVideos();
-  }, []);
+  }, [checking]);
 
   const fetchDegrees = async () => {
     const { data } = await supabase.from("degrees").select("*");
@@ -100,8 +90,6 @@ export default function AdminVideos() {
     setVideos(data || []);
   };
 
-  /* ---------------- ACTIONS ---------------- */
-
   const addVideo = async () => {
     if (!selectedPath) {
       alert("Select a career path");
@@ -127,102 +115,141 @@ export default function AdminVideos() {
     fetchVideos();
   };
 
+  /* ⏳ SAFE conditional render (after hooks) */
+  if (checking) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        Checking admin access...
+      </main>
+    );
+  }
+
   /* ---------------- UI ---------------- */
+ return (
+  <main className="min-h-screen bg-black text-white px-4 py-10">
+    <div className="max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8">Manage Videos</h1>
 
-  return (
-    <div style={{ padding: 40 }}>
-      <h1>Manage Videos</h1>
+      {/* FORM CARD */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-5">
 
-      <select
-        onChange={(e) => {
-          setSelectedDegree(e.target.value);
-          fetchAreas(e.target.value);
-        }}
-      >
-        <option value="">Select Degree</option>
-        {degrees.map((d) => (
-          <option key={d.id} value={d.id}>
-            {d.name}
-          </option>
-        ))}
-      </select>
+        {/* DEGREE */}
+        <select
+          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
+          onChange={(e) => {
+            setSelectedDegree(e.target.value);
+            fetchAreas(e.target.value);
+          }}
+        >
+          <option value="">Select Degree</option>
+          {degrees.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
 
-      <br /><br />
+        {/* AREA */}
+        <select
+          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3 disabled:opacity-50"
+          disabled={!areas.length}
+          onChange={(e) => {
+            setSelectedArea(e.target.value);
+            fetchPaths(e.target.value);
+          }}
+        >
+          <option value="">Select Career Area</option>
+          {areas.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </select>
 
-      <select
-        disabled={!areas.length}
-        onChange={(e) => {
-          setSelectedArea(e.target.value);
-          fetchPaths(e.target.value);
-        }}
-      >
-        <option value="">Select Career Area</option>
-        {areas.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.name}
-          </option>
-        ))}
-      </select>
+        {/* PATH */}
+        <select
+          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3 disabled:opacity-50"
+          disabled={!paths.length}
+          onChange={(e) => setSelectedPath(e.target.value)}
+        >
+          <option value="">Select Career Path</option>
+          {paths.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
 
-      <br /><br />
+        {/* TITLE */}
+        <input
+          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
+          placeholder="Video Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-      <select
-        disabled={!paths.length}
-        onChange={(e) => setSelectedPath(e.target.value)}
-      >
-        <option value="">Select Career Path</option>
-        {paths.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-          </option>
-        ))}
-      </select>
+        {/* YOUTUBE */}
+        <input
+          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
+          placeholder="YouTube URL"
+          value={youtubeUrl}
+          onChange={(e) => setYoutubeUrl(e.target.value)}
+        />
 
-      <br /><br />
+        {/* LEVEL */}
+        <div className="flex gap-4">
+          <select
+            className="flex-1 bg-black border border-zinc-700 rounded-lg px-4 py-3"
+            value={level}
+            onChange={(e) => setLevel(e.target.value)}
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
 
-      <input
-        placeholder="Video Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-
-      <br /><br />
-
-      <input
-        placeholder="YouTube URL"
-        value={youtubeUrl}
-        onChange={(e) => setYoutubeUrl(e.target.value)}
-      />
-
-      <br /><br />
-
-      <select value={level} onChange={(e) => setLevel(e.target.value)}>
-        <option value="beginner">Beginner</option>
-        <option value="intermediate">Intermediate</option>
-        <option value="advanced">Advanced</option>
-      </select>
-
-      <br /><br />
-
-      <input
-        type="number"
-        value={orderNo}
-        onChange={(e) => setOrderNo(Number(e.target.value))}
-      />
-
-      <br /><br />
-
-      <button onClick={addVideo}>Add Video</button>
-
-      <hr />
-
-      <h2>Existing Videos</h2>
-      {videos.map((v) => (
-        <div key={v.id}>
-          {v.title}
-          <button onClick={() => deleteVideo(v.id)}>Delete</button>
+          <input
+            className="w-32 bg-black border border-zinc-700 rounded-lg px-4 py-3"
+            type="number"
+            min={1}
+            value={orderNo}
+            onChange={(e) => setOrderNo(Number(e.target.value))}
+          />
         </div>
-      ))}
+
+        {/* ADD BUTTON */}
+        <button
+          onClick={addVideo}
+          className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90"
+        >
+          Add Video
+        </button>
+      </div>
+
+      {/* LIST */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-4">Existing Videos</h2>
+
+        <div className="space-y-3">
+          {videos.map((v) => (
+            <div
+              key={v.id}
+              className="flex justify-between items-center bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3"
+            >
+              <span>{v.title}</span>
+
+              <button
+                onClick={() => deleteVideo(v.id)}
+                className="text-red-400 hover:text-red-300 text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
-  );
+  </main>
+);
+
 }
