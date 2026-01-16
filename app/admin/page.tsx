@@ -44,16 +44,33 @@ export default function AdminPage() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-black text-white p-8">
-      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+return (
+  <main className="min-h-screen bg-black text-white p-8">
+    <h1 className="text-2xl font-bold mb-6">Admin Panel</h1>
 
-      <a
-        href="/admin/videos"
-        className="inline-block border border-zinc-700 px-4 py-2 rounded hover:bg-zinc-900"
+    <div className="flex flex-col gap-4 max-w-sm">
+      <button
+        onClick={() => router.push("/admin/interests")}
+        className="border border-zinc-700 px-4 py-3 rounded hover:bg-zinc-900 text-left"
+      >
+        Manage Interests
+      </button>
+
+      <button
+        onClick={() => router.push("/admin/resources")}
+        className="border border-zinc-700 px-4 py-3 rounded hover:bg-zinc-900 text-left"
+      >
+        Manage Resources
+      </button>
+
+      <button
+        onClick={() => router.push("/admin/videos")}
+        className="border border-zinc-700 px-4 py-3 rounded hover:bg-zinc-900 text-left"
       >
         Manage Videos
-      </a>
-    </main>
-  );
+      </button>
+    </div>
+  </main>
+);
+
 }

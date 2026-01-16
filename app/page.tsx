@@ -5,40 +5,78 @@ export default async function Home() {
   const { data: degrees } = await supabase
     .from("degrees")
     .select("*");
+type ProgressRow = {
+  completed: boolean;
+  interest_resources: {
+    interest_id: number;
+    interests: {
+      id: number;
+      name: string;
+    }[];
+  }[];
+};
 
 return (
-  <main className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-    <div className="max-w-2xl w-full px-6 text-center space-y-6">
+<div className="min-h-screen bg-black text-white">
+  <div className="max-w-7xl mx-auto px-6 pt-24">
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      
+      {/* LEFT: HERO */}
+      <div>
+        <h1 className="text-5xl font-bold mb-4">ThiranX</h1>
 
-          {/* HERO TEXT */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-      ThiranX
-    </h1>
+        <h2 className="text-2xl text-gray-300 mb-6">
+          Skills that multiply careers
+        </h2>
 
-    <h2 className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300">
-      Skills that multiply careers
-    </h2>
+        <p className="text-gray-400 max-w-lg mb-8">
+          Structured skill pathways designed for your degree — curated
+          from the best learning content and guided for real jobs.
+        </p>
 
-    <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-      Structured skill pathways designed for your degree — curated from the best
-      learning content and guided for real jobs.
-    </p>
+        <div className="space-y-4">
+          <button className="w-full py-4 rounded-lg bg-zinc-900 hover:bg-zinc-800">
+            B.Tech Computer Science
+          </button>
 
-
-      {/* DEGREE BUTTONS */}
-      <div className="mt-8 space-y-3">
-        {degrees?.map((d) => (
-          <a
-            key={d.id}
-            href={`/degree/${d.slug}`}
-            className="block w-full bg-zinc-900 hover:bg-zinc-800 rounded-lg py-3 font-medium transition"
-          >
-            {d.name}
-          </a>
-        ))}
+          <button className="w-full py-4 rounded-lg bg-zinc-900 hover:bg-zinc-800">
+            B.Com
+          </button>
+        </div>
       </div>
+
+      {/* RIGHT: INTEREST */}
+      <div className="border border-zinc-800 rounded-xl p-6 hover:bg-zinc-900 transition">
+        <h3 className="text-xl font-semibold mb-2">
+          Explore by Interest
+        </h3>
+
+        <p className="text-gray-400 mb-4">
+          Learn skills outside your degree and boost your career.
+        </p>
+
+        <div className="text-lg mb-4">
+          Web Development · Finance · Data Analytics · Biology
+        </div>
+
+        <a
+          href="/interests"
+          className="text-blue-400 hover:underline"
+        >
+          Start learning →
+        </a>
+      </div>
+
+      
+
     </div>
-  </main>
+    
+  </div>
+  
+</div>
+
+
 );
 
 }
