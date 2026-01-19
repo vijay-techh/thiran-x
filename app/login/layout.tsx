@@ -6,13 +6,13 @@ export default async function LoginLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await supabaseServer();
+  const supabase = await supabaseServer(); // ✅ AWAIT HERE
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // ✅ If already logged in, block /login
+  // If already logged in, block /login
   if (user) {
     redirect("/dashboard");
   }
