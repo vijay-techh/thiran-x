@@ -8,10 +8,11 @@ export default async function CareerPathPage({ params }: PageProps) {
   const { slug } = await params;
 
   const { data: path } = await supabase
-    .from("career_paths")
+    .from("skill_paths")
     .select("*")
     .eq("slug", slug)
     .single();
+    
 
   if (!path) {
     return <p>Career path not found</p>;
@@ -40,7 +41,7 @@ export default async function CareerPathPage({ params }: PageProps) {
   const { data: videos } = await supabase
     .from("videos")
     .select("*")
-    .eq("career_path_id", path.id)
+    .eq("skill_path_id", path.id)
     .order("level", { ascending: true })
     .order("order_no", { ascending: true });
 

@@ -23,5 +23,6 @@ export default async function InterestsPage() {
         ))}
       </div>
     </div>
+    
   );
 }

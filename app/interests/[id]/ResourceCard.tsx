@@ -1,3 +1,8 @@
+import ResourceCard from "./ResourceCard";
+
+
+
+
 "use client";
 
 type Resource = {
@@ -7,7 +12,13 @@ type Resource = {
   youtube_url: string;
 };
 
-export default function ResourceCard({ resource }: { resource: Resource }) {
+export default function ResourceCard({
+  resource,
+  completed,
+}: {
+  resource: Resource;
+  completed: boolean;
+}) {
   const embedUrl = getYouTubeEmbedUrl(resource.youtube_url);
 
   return (
@@ -25,21 +36,27 @@ export default function ResourceCard({ resource }: { resource: Resource }) {
         </div>
       )}
 
-      {/* ✅ CLIENT SIDE BUTTON */}
-      <button
-        onClick={async () => {
-          await fetch("/api/progress", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ resource_id: resource.id }),
-          });
+      {/* ✅ COMPLETED VS BUTTON */}
+      {completed ? (
+        <span className="inline-block mt-4 text-green-400 text-sm font-medium">
+          ✓ Completed
+        </span>
+      ) : (
+        <button
+          onClick={async () => {
+            await fetch("/api/progress", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ resource_id: resource.id }),
+            });
 
-          alert("Marked as completed");
-        }}
-        className="mt-4 px-4 py-2 bg-green-600 rounded"
-      >
-        Mark as Completed
-      </button>
+            window.location.reload(); // simple & reliable
+          }}
+          className="mt-4 px-4 py-2 bg-green-600 rounded"
+        >
+          Mark as Completed
+        </button>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ const ADMIN_EMAILS = ["vijayvijaayyyyy@gmail.com"];
 
 export default function Navbar() {
   const router = useRouter();
+
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 

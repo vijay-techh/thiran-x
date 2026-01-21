@@ -69,7 +69,17 @@ const {
     progress?.map(p => [p.resource_id, p.completed])
   );
 
-  
+  const total = mappings?.length || 0;
+
+const completed = mappings?.filter(
+  (m: any) => progressMap.get(m.resources.id)
+).length || 0;
+
+
+const percent = total
+  ? Math.round((completed / total) * 100)
+  : 0;
+
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
@@ -80,6 +90,20 @@ const {
       <p className="text-gray-400 mb-6">
         {interest?.description}
       </p>
+      <div className="mb-6">
+  <div className="flex justify-between text-sm text-gray-400 mb-1">
+    <span>Progress</span>
+    <span>{completed}/{total} completed</span>
+  </div>
+
+  <div className="h-2 bg-zinc-800 rounded">
+    <div
+      className="h-2 bg-green-500 rounded transition-all"
+      style={{ width: `${percent}%` }}
+    />
+  </div>
+</div>
+
 
       {/* EMPTY STATE */}
       {(!mappings || mappings.length === 0) && (
@@ -87,6 +111,7 @@ const {
           No resources added yet.
         </p>
       )}
+      
 
       {/* VIDEOS */}
       <div className="space-y-8">
@@ -126,6 +151,7 @@ const {
           })}
 
       </div>
+      
     </main>
   );
 }

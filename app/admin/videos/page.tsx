@@ -8,16 +8,15 @@ const ADMIN_EMAILS = ["vijayvijaayyyyy@gmail.com"];
 
 export default function AdminVideos() {
   const router = useRouter();
+
   const [checking, setChecking] = useState(true);
 
   const [level, setLevel] = useState("beginner");
   const [orderNo, setOrderNo] = useState(1);
 
-  const [degrees, setDegrees] = useState<any[]>([]);
   const [areas, setAreas] = useState<any[]>([]);
   const [paths, setPaths] = useState<any[]>([]);
 
-  const [selectedDegree, setSelectedDegree] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
   const [selectedPath, setSelectedPath] = useState("");
 
@@ -25,7 +24,7 @@ export default function AdminVideos() {
   const [title, setTitle] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
-  /* 🔐 ADMIN CHECK (always runs) */
+  /* 🔐 ADMIN CHECK */
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -46,24 +45,18 @@ export default function AdminVideos() {
     checkAdmin();
   }, [router]);
 
-  /* 📦 FETCH DATA — only after admin is confirmed */
+  /* 📦 FETCH DATA */
   useEffect(() => {
     if (checking) return;
-
-    fetchDegrees();
+    fetchAreas();
     fetchVideos();
   }, [checking]);
 
-  const fetchDegrees = async () => {
-    const { data } = await supabase.from("degrees").select("*");
-    setDegrees(data || []);
-  };
-
-  const fetchAreas = async (degreeId: string) => {
+  const fetchAreas = async () => {
     const { data } = await supabase
-      .from("career_areas")
+      .from("domains")
       .select("*")
-      .eq("degree_id", degreeId);
+      .order("name");
 
     setAreas(data || []);
     setPaths([]);
@@ -73,9 +66,10 @@ export default function AdminVideos() {
 
   const fetchPaths = async (areaId: string) => {
     const { data } = await supabase
-      .from("career_paths")
+      .from("skill_paths")
       .select("*")
-      .eq("area_id", areaId);
+      .eq("area_id", areaId)
+      .order("name");
 
     setPaths(data || []);
     setSelectedPath("");
@@ -84,15 +78,21 @@ export default function AdminVideos() {
   const fetchVideos = async () => {
     const { data } = await supabase
       .from("videos")
-      .select("*")
+      .select(`
+        id,
+        title,
+        level,
+        order_no,
+        career_paths(name)
+      `)
       .order("created_at", { ascending: false });
 
     setVideos(data || []);
   };
 
   const addVideo = async () => {
-    if (!selectedPath) {
-      alert("Select a career path");
+    if (!selectedPath || !title || !youtubeUrl) {
+      alert("Fill all fields");
       return;
     }
 
@@ -115,7 +115,6 @@ export default function AdminVideos() {
     fetchVideos();
   };
 
-  /* ⏳ SAFE conditional render (after hooks) */
   if (checking) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -124,132 +123,119 @@ export default function AdminVideos() {
     );
   }
 
-  /* ---------------- UI ---------------- */
- return (
-  <main className="min-h-screen bg-black text-white px-4 py-10">
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Manage Videos</h1>
+  return (
+    <main className="min-h-screen bg-black text-white px-4 py-10">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">Manage Videos</h1>
 
-      {/* FORM CARD */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-5">
+        {/* FORM */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-5">
 
-        {/* DEGREE */}
-        <select
-          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
-          onChange={(e) => {
-            setSelectedDegree(e.target.value);
-            fetchAreas(e.target.value);
-          }}
-        >
-          <option value="">Select Degree</option>
-          {degrees.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-
-        {/* AREA */}
-        <select
-          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3 disabled:opacity-50"
-          disabled={!areas.length}
-          onChange={(e) => {
-            setSelectedArea(e.target.value);
-            fetchPaths(e.target.value);
-          }}
-        >
-          <option value="">Select Career Area</option>
-          {areas.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-
-        {/* PATH */}
-        <select
-          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3 disabled:opacity-50"
-          disabled={!paths.length}
-          onChange={(e) => setSelectedPath(e.target.value)}
-        >
-          <option value="">Select Career Path</option>
-          {paths.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-
-        {/* TITLE */}
-        <input
-          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
-          placeholder="Video Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        {/* YOUTUBE */}
-        <input
-          className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
-          placeholder="YouTube URL"
-          value={youtubeUrl}
-          onChange={(e) => setYoutubeUrl(e.target.value)}
-        />
-
-        {/* LEVEL */}
-        <div className="flex gap-4">
+          {/* AREA */}
           <select
-            className="flex-1 bg-black border border-zinc-700 rounded-lg px-4 py-3"
-            value={level}
-            onChange={(e) => setLevel(e.target.value)}
+            className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
+            value={selectedArea}
+            onChange={(e) => {
+              setSelectedArea(e.target.value);
+              fetchPaths(e.target.value);
+            }}
           >
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
+            <option value="">Select Career Area</option>
+            {areas.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
           </select>
 
+          {/* PATH */}
+          <select
+            className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3 disabled:opacity-50"
+            disabled={!paths.length}
+            value={selectedPath}
+            onChange={(e) => setSelectedPath(e.target.value)}
+          >
+            <option value="">Select Career Path</option>
+            {paths.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+
+          {/* TITLE */}
           <input
-            className="w-32 bg-black border border-zinc-700 rounded-lg px-4 py-3"
-            type="number"
-            min={1}
-            value={orderNo}
-            onChange={(e) => setOrderNo(Number(e.target.value))}
+            className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
+            placeholder="Video Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
-        </div>
 
-        {/* ADD BUTTON */}
-        <button
-          onClick={addVideo}
-          className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90"
-        >
-          Add Video
-        </button>
-      </div>
+          {/* YOUTUBE */}
+          <input
+            className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-3"
+            placeholder="YouTube URL"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+          />
 
-      {/* LIST */}
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-4">Existing Videos</h2>
-
-        <div className="space-y-3">
-          {videos.map((v) => (
-            <div
-              key={v.id}
-              className="flex justify-between items-center bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3"
+          {/* LEVEL + ORDER */}
+          <div className="flex gap-4">
+            <select
+              className="flex-1 bg-black border border-zinc-700 rounded-lg px-4 py-3"
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
             >
-              <span>{v.title}</span>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
 
-              <button
-                onClick={() => deleteVideo(v.id)}
-                className="text-red-400 hover:text-red-300 text-sm"
+            <input
+              className="w-32 bg-black border border-zinc-700 rounded-lg px-4 py-3"
+              type="number"
+              min={1}
+              value={orderNo}
+              onChange={(e) => setOrderNo(Number(e.target.value))}
+            />
+          </div>
+
+          <button
+            onClick={addVideo}
+            className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90"
+          >
+            Add Video
+          </button>
+        </div>
+
+        {/* LIST */}
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Existing Videos</h2>
+
+          <div className="space-y-3">
+            {videos.map((v) => (
+              <div
+                key={v.id}
+                className="flex justify-between items-center bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3"
               >
-                Delete
-              </button>
-            </div>
-          ))}
+                <span>
+                  {v.title}{" "}
+                  <span className="text-xs text-zinc-400">
+                    ({v.level})
+                  </span>
+                </span>
+
+                <button
+                  onClick={() => deleteVideo(v.id)}
+                  className="text-red-400 hover:text-red-300 text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  </main>
-);
-
+    </main>
+  );
 }
